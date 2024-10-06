@@ -14,19 +14,128 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
-  name      String
-  email     String @unique
-  password  String
-  role      Role
-  contactNo String
-  address   String
+  id            String         @id @default(uuid())
+  username      String
+  email         String         @unique
+  password      String
+  role          Role
+  contactNo     String
+  address       String
+  reviews       Review[]
+  bookings      Booking[]
+  notifications Notification[]
 
   @@map("users")
 }
 
+model Service {
+  id          String          @id @default(uuid())
+  serviceName String
+  content     String
+  image       String
+  status      Status          @default(active)
+  price       Int
+  category    ServiceCategory
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  reviews     Review[]
+  bookings    Booking[]
+  schedules   Schedule[]
+
+  @@map("services")
+}
+
+model Schedule {
+  id                  String     @id @default(uuid())
+  startTime           DateTime
+  endTime             DateTime
+  eachSessionDuration Int
+  daysOfWeek          DaysOfWeek
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+}
+
+model Booking {
+  id            String        @id @default(uuid())
+  date          DateTime
+  startTime     DateTime
+  endTime       DateTime
+  slotAvailable Boolean
+  bookingStatus BookingStatus @default(pending)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("bookings")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  content   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
 enum Role {
-  user
+  customer
   admin
   superadmin
+}
+
+enum Status {
+  active
+  upcoming
+}
+
+enum ServiceCategory {
+  technical
+  lifestyle
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  rejected
+  adjusted
+  completed
+  cancelled
+}
+
+enum DaysOfWeek {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
 }

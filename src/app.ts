@@ -20,7 +20,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.status(httpStatus.OK).json({
     statusCode: httpStatus.OK,
     success: true,
-    message: "Welcome to Rahat's Book catallog API",
+    message: "Welcome to Rahat's Nomad Horizon project API",
   });
 });
 
