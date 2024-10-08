@@ -19,6 +19,18 @@ const createUser = async (payload: SignUpProps) => {
   return resultWithoutPassword;
 };
 
+const getSingleUserById = async (id: string) => {
+  const result = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (result) return excludeFromObject(result, ["password"]);
+
+  // return resultWithoutPassword;
+};
+
 export const UserService = {
   createUser,
+  getSingleUserById,
 };

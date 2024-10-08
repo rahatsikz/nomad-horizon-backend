@@ -17,6 +17,26 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getSingleUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const result = await UserService.getSingleUserById(id);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const UserController = {
   createUser,
+  getSingleUserById,
 };

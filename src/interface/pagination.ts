@@ -1,6 +1,7 @@
 export type IPaginationOptions = {
   page?: number;
-  size?: number;
+  limit?: number;
+  total?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 };
