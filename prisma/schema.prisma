@@ -36,7 +36,7 @@ model Service {
   serviceName String
   content     String
   image       String
-  status      Status          @default(active)
+  status      Status          @default(available)
   price       Int
   category    ServiceCategory
   createdAt   DateTime        @default(now())
@@ -115,7 +115,7 @@ enum Role {
 }
 
 enum Status {
-  active
+  available
   upcoming
 }
 
