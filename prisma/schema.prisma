@@ -50,8 +50,8 @@ model Service {
 
 model Schedule {
   id                  String     @id @default(uuid())
-  startTime           DateTime
-  endTime             DateTime
+  startTime           String
+  endTime             String
   eachSessionDuration Int
   daysOfWeek          DaysOfWeek
   createdAt           DateTime   @default(now())
@@ -64,8 +64,8 @@ model Schedule {
 model Booking {
   id            String        @id @default(uuid())
   date          DateTime
-  startTime     DateTime
-  endTime       DateTime
+  startTime     String
+  endTime       String
   slotAvailable Boolean
   bookingStatus BookingStatus @default(pending)
   createdAt     DateTime      @default(now())
