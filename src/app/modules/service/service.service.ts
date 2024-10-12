@@ -68,6 +68,43 @@ const createService = async (payload: any) => {
   return result;
 };
 
+const getAllServices = async () => {
+  const result = await prisma.service.findMany({
+    include: {
+      schedules: {
+        select: {
+          daysOfWeek: true,
+          startTime: true,
+          endTime: true,
+          eachSessionDuration: true,
+        },
+      },
+    },
+  });
+  return result;
+};
+
+const getServiceById = async (id: string) => {
+  const result = await prisma.service.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      schedules: {
+        select: {
+          daysOfWeek: true,
+          startTime: true,
+          endTime: true,
+          eachSessionDuration: true,
+        },
+      },
+    },
+  });
+  return result;
+};
+
 export const ServiceService = {
   createService,
+  getAllServices,
+  getServiceById,
 };
