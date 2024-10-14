@@ -66,7 +66,7 @@ model Booking {
   date          DateTime
   startTime     String
   endTime       String
-  bookingStatus BookingStatus @default(pending)
+  bookingStatus BookingStatus @default(processing)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -124,7 +124,7 @@ enum ServiceCategory {
 }
 
 enum BookingStatus {
-  pending
+  processing
   confirmed
   rejected
   adjusted
