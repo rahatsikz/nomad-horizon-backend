@@ -59,6 +59,8 @@ model Schedule {
 
   serviceId String
   service   Service @relation(fields: [serviceId], references: [id])
+
+  @@map("schedules")
 }
 
 model Booking {

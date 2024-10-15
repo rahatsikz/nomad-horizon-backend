@@ -1,21 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import { BookingService } from "./booking.service";
+import { NotificationService } from "./notification.service";
 import httpStatus from "http-status";
 
-const createBooking = async (
+const getNotificationsByID = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const payload = req.body;
     const userId = req.user?.userId;
+    const result = await NotificationService.getNotificationsByID(userId);
 
-    const result = await BookingService.createBooking(payload, userId);
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking added successfully",
+      message: "Notifications fetched successfully",
       data: result,
     });
   } catch (error) {
@@ -23,6 +22,6 @@ const createBooking = async (
   }
 };
 
-export const BookingController = {
-  createBooking,
+export const NotificationController = {
+  getNotificationsByID,
 };

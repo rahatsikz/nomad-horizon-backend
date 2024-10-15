@@ -12,24 +12,6 @@ const getSchedulesOfAvailablity = async ({
   serviceId?: string;
   date?: Date;
 }) => {
-  //! remove booking dummy data
-  // const booking = [
-  //   {
-  //     date: date,
-  //     startTime: "09:00",
-  //     endTime: "10:00",
-  //     serviceId: serviceId,
-  //     userId: "390c6ab9-8adf-4fa0-92d9-bb660a9a788b",
-  //   },
-  //   {
-  //     date: date,
-  //     startTime: "16:00",
-  //     endTime: "17:00",
-  //     serviceId: serviceId,
-  //     userId: "390c6ab9-8adf-4fa0-92d9-bb660a9a788b",
-  //   },
-  // ];
-
   const bookings = await prisma.booking.findMany({
     where: {
       serviceId,
