@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import prisma from "../../../shared/prisma";
 import { IBooking } from "./booking.interface";
+import { BookingStatus } from "@prisma/client";
 
 const createBooking = async (payload: IBooking, userId: string) => {
   const result = await prisma.$transaction(
@@ -10,6 +11,13 @@ const createBooking = async (payload: IBooking, userId: string) => {
         data: {
           ...payload,
           userId,
+        },
+        include: {
+          service: {
+            select: {
+              serviceName: true,
+            },
+          },
         },
       });
 
@@ -25,7 +33,9 @@ const createBooking = async (payload: IBooking, userId: string) => {
         data: {
           userId,
           content:
-            "We got your booking request. Once it is approved, we will notify you.",
+            "We got your booking request for " +
+            newBooking.service.serviceName +
+            ". Once it is approved, we will notify you.",
         },
       });
 
@@ -40,6 +50,41 @@ const createBooking = async (payload: IBooking, userId: string) => {
   return result;
 };
 
+const customerSpecificBookings = async (userId: string) => {
+  const result = await prisma.booking.findMany({
+    where: {
+      user: {
+        id: userId,
+      },
+    },
+    include: {
+      service: {
+        select: {
+          serviceName: true,
+        },
+      },
+    },
+  });
+
+  return result;
+};
+
+const cancelBooking = async (bookingId: string, userId: string) => {
+  const result = await prisma.booking.update({
+    where: {
+      id: bookingId,
+      userId,
+    },
+    data: {
+      bookingStatus: BookingStatus.cancelled,
+    },
+  });
+
+  return result;
+};
+
 export const BookingService = {
   createBooking,
+  customerSpecificBookings,
+  cancelBooking,
 };
