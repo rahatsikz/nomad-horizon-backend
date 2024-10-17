@@ -19,10 +19,29 @@ router.get(
   BookingController.customerSpecificBookings
 );
 
+router.get("/all-bookings", auth("admin"), BookingController.getAllBookings);
+
 router.patch(
   "/cancel-booking/:id",
   auth("customer"),
   BookingController.cancelBooking
+);
+router.patch(
+  "/adjust-booking/:id",
+  auth("admin"),
+  BookingController.adjustBooking
+);
+
+router.patch(
+  "/update-booking-status/:id",
+  auth("admin"),
+  BookingController.updateBookingStatus
+);
+
+router.delete(
+  "/delete-booking/:id",
+  auth("admin"),
+  BookingController.deleteBooking
 );
 
 export const BookingRoutes = router;
