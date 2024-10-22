@@ -58,8 +58,49 @@ const getServiceById = async (
   }
 };
 
+const updateService = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const payload = req.body;
+    const result = await ServiceService.updateService(id, payload);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Service updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteService = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const result = await ServiceService.deleteService(id);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Service deleted successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const ServiceController = {
   createService,
   getAllServices,
   getServiceById,
+  updateService,
+  deleteService,
 };

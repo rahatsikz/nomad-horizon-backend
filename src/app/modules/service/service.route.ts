@@ -17,4 +17,13 @@ router.get("/", ServiceController.getAllServices);
 
 router.get("/:id", ServiceController.getServiceById);
 
+router.patch(
+  "/:id",
+  auth("admin"),
+  validateRequest(ServiceValidation.update),
+  ServiceController.updateService
+);
+
+router.delete("/:id", auth("admin"), ServiceController.deleteService);
+
 export const ServiceRoutes = router;

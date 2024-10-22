@@ -2,6 +2,7 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import prisma from "../../../shared/prisma";
 import { validateSchedule } from "./service.utils";
+import { Service } from "@prisma/client";
 
 const createService = async (payload: any) => {
   const { schedule, ...otherPayload } = payload;
@@ -109,8 +110,61 @@ const getServiceById = async (id: string) => {
   return result;
 };
 
+const updateService = async (id: string, payload: Partial<Service>) => {
+  const result = await prisma.service.update({
+    where: {
+      id,
+    },
+    data: payload,
+  });
+  return result;
+};
+
+const deleteService = async (id: string) => {
+  const deleteServiceWithSchedule = await prisma.$transaction(
+    async (tx) => {
+      const deleteSchedule = await tx.schedule.deleteMany({
+        where: {
+          service: {
+            id,
+          },
+        },
+      });
+      if (!deleteSchedule) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "Schedule has not been deleted"
+        );
+      }
+
+      const deleteService = await tx.service.delete({
+        where: {
+          id,
+        },
+      });
+
+      if (!deleteService) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "Service has not been deleted"
+        );
+      }
+
+      return deleteService;
+    },
+    {
+      maxWait: 5000,
+      timeout: 10000,
+    }
+  );
+
+  return deleteServiceWithSchedule;
+};
+
 export const ServiceService = {
   createService,
   getAllServices,
   getServiceById,
+  updateService,
+  deleteService,
 };

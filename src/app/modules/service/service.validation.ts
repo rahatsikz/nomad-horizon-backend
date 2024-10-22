@@ -23,6 +23,18 @@ const create = z.object({
   }),
 });
 
+const update = z.object({
+  body: z.object({
+    serviceName: z.string().optional(),
+    content: z.string().optional(),
+    price: z.number().optional(),
+    category: z.enum(["technical", "lifestyle"]).optional(),
+    status: z.enum(["available", "upcoming"]).optional(),
+    image: z.string().optional(),
+  }),
+});
+
 export const ServiceValidation = {
   create,
+  update,
 };
