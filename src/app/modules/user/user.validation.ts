@@ -20,6 +20,15 @@ const create = z.object({
   }),
 });
 
+const update = z.object({
+  body: z.object({
+    username: z.string().optional(),
+    address: z.string().optional(),
+    contactNo: z.string().optional(),
+  }),
+});
+
 export const UserValidation = {
   create,
+  update,
 };
