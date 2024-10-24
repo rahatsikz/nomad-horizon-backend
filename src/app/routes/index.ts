@@ -5,6 +5,7 @@ import { ServiceRoutes } from "../modules/service/service.route";
 import { ScheduleRoutes } from "../modules/schedule/schedule.route";
 import { BookingRoutes } from "../modules/booking/booking.route";
 import { NotificationRoutes } from "../modules/notification/notification.route";
+import { BlogRoutes } from "../modules/blog/blog.route";
 
 const router = express.Router();
 
@@ -32,6 +33,10 @@ const moduleRoutes = [
   {
     path: "/notifications",
     route: NotificationRoutes,
+  },
+  {
+    path: "/blogs",
+    route: BlogRoutes,
   },
 ];
 
