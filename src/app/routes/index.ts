@@ -6,6 +6,8 @@ import { ScheduleRoutes } from "../modules/schedule/schedule.route";
 import { BookingRoutes } from "../modules/booking/booking.route";
 import { NotificationRoutes } from "../modules/notification/notification.route";
 import { BlogRoutes } from "../modules/blog/blog.route";
+import { EventRoutes } from "../modules/event/event.route";
+import { NewsRoutes } from "../modules/news/news.route";
 
 const router = express.Router();
 
@@ -37,6 +39,14 @@ const moduleRoutes = [
   {
     path: "/blogs",
     route: BlogRoutes,
+  },
+  {
+    path: "/events",
+    route: EventRoutes,
+  },
+  {
+    path: "/news",
+    route: NewsRoutes,
   },
 ];
 

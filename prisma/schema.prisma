@@ -122,6 +122,32 @@ model Blog {
   @@map("blogs")
 }
 
+model Event {
+  id             String   @id @default(uuid())
+  title          String
+  content        String
+  city           String
+  country        String
+  date           DateTime
+  showOnHomepage Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("events")
+}
+
+model News {
+  id             String   @id @default(uuid())
+  title          String
+  content        String
+  date           DateTime
+  showOnHomepage Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("news")
+}
+
 enum Role {
   customer
   admin
