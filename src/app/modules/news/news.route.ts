@@ -13,4 +13,17 @@ router.post(
   NewsController.createNews
 );
 
+router.get("/", NewsController.getAllNews);
+
+router.get("/:id", NewsController.getNewsById);
+
+router.patch(
+  "/:id",
+  auth("admin"),
+  validateRequest(NewsValidation.update),
+  NewsController.updateNews
+);
+
+router.delete("/:id", auth("admin"), NewsController.deleteNews);
+
 export const NewsRoutes = router;

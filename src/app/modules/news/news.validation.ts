@@ -16,6 +16,16 @@ const create = z.object({
   }),
 });
 
+const update = z.object({
+  body: z.object({
+    title: z.string().optional(),
+    content: z.string().optional(),
+    date: z.string().datetime().optional(),
+    showOnHomepage: z.boolean().optional(),
+  }),
+});
+
 export const NewsValidation = {
   create,
+  update,
 };
