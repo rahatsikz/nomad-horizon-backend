@@ -17,6 +17,17 @@ const create = z.object({
   }),
 });
 
+const update = z.object({
+  body: z.object({
+    title: z.string().optional(),
+    content: z.string().optional(),
+    author: z.string().optional(),
+    image: z.string().optional(),
+    showOnHomepage: z.boolean().optional(),
+  }),
+});
+
 export const BlogValidation = {
   create,
+  update,
 };
