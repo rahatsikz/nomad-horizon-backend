@@ -8,6 +8,7 @@ import { NotificationRoutes } from "../modules/notification/notification.route";
 import { BlogRoutes } from "../modules/blog/blog.route";
 import { EventRoutes } from "../modules/event/event.route";
 import { NewsRoutes } from "../modules/news/news.route";
+import { ReviewRoutes } from "../modules/review/review.route";
 
 const router = express.Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
   {
     path: "/news",
     route: NewsRoutes,
+  },
+  {
+    path: "/reviews",
+    route: ReviewRoutes,
   },
 ];
 
