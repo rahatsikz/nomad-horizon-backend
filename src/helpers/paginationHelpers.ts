@@ -6,10 +6,15 @@ const calculatePagination = (options: IPaginationOptions) => {
 
   const skip = (page - 1) * limit;
 
+  const sortBy = options.sortBy || "createdAt";
+  const sortOrder = options.sortOrder || "asc";
+
   return {
     page,
     limit,
     skip,
+    sortBy,
+    sortOrder,
   };
 };
 

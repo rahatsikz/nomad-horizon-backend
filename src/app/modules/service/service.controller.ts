@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ServiceService } from "./service.service";
 import httpStatus from "http-status";
+import pick from "../../../shared/pick";
 
 const createService = async (
   req: Request,
@@ -27,7 +28,17 @@ const getAllServices = async (
   next: NextFunction
 ) => {
   try {
-    const result = await ServiceService.getAllServices();
+    const filters = pick(req.query, ["search", "category", "price"]);
+    const paginationOptions = pick(req.query, [
+      "page",
+      "limit",
+      "sortBy",
+      "sortOrder",
+    ]);
+    const result = await ServiceService.getAllServices(
+      filters,
+      paginationOptions
+    );
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,

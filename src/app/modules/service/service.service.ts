@@ -3,6 +3,8 @@ import ApiError from "../../../errors/ApiError";
 import prisma from "../../../shared/prisma";
 import { validateSchedule } from "./service.utils";
 import { Service } from "@prisma/client";
+import { paginationHelpers } from "../../../helpers/paginationHelpers";
+import { IPaginationOptions } from "../../../interface/pagination";
 
 const createService = async (payload: any) => {
   const { schedule, ...otherPayload } = payload;
@@ -75,8 +77,65 @@ const createService = async (payload: any) => {
   return result;
 };
 
-const getAllServices = async () => {
+const getAllServices = async (
+  filters: {
+    search?: string;
+    category?: string;
+    price?: number;
+  },
+  paginationOptions: IPaginationOptions
+) => {
+  const { page, limit, sortBy, sortOrder, skip } =
+    paginationHelpers.calculatePagination(paginationOptions);
+
+  const { search, ...restFilters } = filters;
+
+  const conditions = [];
+
+  if (search && search?.length > 0) {
+    conditions.push({
+      OR: ["serviceName"].map((key) => ({
+        [key]: {
+          contains: search,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(restFilters).length > 0) {
+    conditions.push({
+      AND: Object.keys(restFilters).map((key) => {
+        if (key.includes("price")) {
+          return {
+            [key]: {
+              lte: Number(restFilters[key as keyof typeof restFilters]),
+            },
+          };
+        } else {
+          return {
+            [key]: restFilters[key as keyof typeof restFilters],
+          };
+        }
+      }),
+    });
+  }
+
+  const whereCondition = conditions.length > 0 ? { AND: conditions } : {};
+
   const result = await prisma.service.findMany({
+    where: whereCondition,
+    skip: skip,
+    take: limit,
+    orderBy:
+      sortBy === "popularity"
+        ? {
+            reviews: {
+              _count: sortOrder,
+            },
+          }
+        : { [sortBy]: sortOrder },
+
     include: {
       schedules: {
         select: {
@@ -88,7 +147,19 @@ const getAllServices = async () => {
       },
     },
   });
-  return result;
+
+  const total = await prisma.service.count({
+    where: whereCondition,
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: result,
+  };
 };
 
 const getServiceById = async (id: string) => {
