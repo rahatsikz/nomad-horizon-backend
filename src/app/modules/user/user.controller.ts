@@ -54,6 +54,24 @@ const getAllCustomers = async (
   }
 };
 
+const getAllAdmins = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await UserService.getAllAdmins();
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Admins fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -86,10 +104,27 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const payload = req.body;
+    const result = await UserService.createAdmin(payload);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Admin created successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const UserController = {
   createUser,
   getSingleUserById,
   getAllCustomers,
   updateUser,
   deleteUser,
+  getAllAdmins,
+  createAdmin,
 };

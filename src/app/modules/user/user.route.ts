@@ -12,8 +12,16 @@ router.post(
   UserController.createUser
 );
 
-router.get("/:id", UserController.getSingleUserById);
+router.post(
+  "/create-admin",
+  auth("superadmin"),
+  validateRequest(UserValidation.create),
+  UserController.createAdmin
+);
 
+router.get("/admins", auth("superadmin"), UserController.getAllAdmins);
+
+router.get("/:id", UserController.getSingleUserById);
 router.get("/", auth("admin"), UserController.getAllCustomers);
 
 router.patch(
@@ -23,6 +31,6 @@ router.patch(
   UserController.updateUser
 );
 
-router.delete("/:id", auth("admin"), UserController.deleteUser);
+router.delete("/:id", auth("admin", "superadmin"), UserController.deleteUser);
 
 export const UserRoutes = router;

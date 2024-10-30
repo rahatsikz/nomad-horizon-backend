@@ -25,6 +25,24 @@ const createUser = async (payload: SignUpProps) => {
   return resultWithoutPassword;
 };
 
+const createAdmin = async (payload: SignUpProps) => {
+  payload.password = await bcrypt.hash(
+    payload.password,
+    Number(config.bcrypt_salt_round)
+  );
+
+  const result = await prisma.user.create({
+    data: {
+      ...payload,
+      role: Role.admin,
+    },
+  });
+
+  const resultWithoutPassword = excludeFromObject(result, ["password"]);
+
+  return resultWithoutPassword;
+};
+
 const getSingleUserById = async (id: string) => {
   const result = await prisma.user.findUnique({
     where: {
@@ -40,6 +58,15 @@ const getAllCustomers = async () => {
   const result = await prisma.user.findMany({
     where: {
       role: Role.customer,
+    },
+  });
+  if (result) return excludeFromList(result, ["password"]);
+};
+
+const getAllAdmins = async () => {
+  const result = await prisma.user.findMany({
+    where: {
+      role: Role.admin,
     },
   });
   if (result) return excludeFromList(result, ["password"]);
@@ -84,4 +111,6 @@ export const UserService = {
   getAllCustomers,
   updateUser,
   deleteUser,
+  getAllAdmins,
+  createAdmin,
 };
