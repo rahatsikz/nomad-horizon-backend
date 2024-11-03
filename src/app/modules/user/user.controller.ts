@@ -119,6 +119,26 @@ const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const updateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.userId;
+    const payload = req.body;
+    const result = await UserService.updateProfile(userId, payload);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Profile updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const UserController = {
   createUser,
   getSingleUserById,
@@ -127,4 +147,5 @@ export const UserController = {
   deleteUser,
   getAllAdmins,
   createAdmin,
+  updateProfile,
 };

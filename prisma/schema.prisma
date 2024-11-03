@@ -27,6 +27,7 @@ model User {
   reviews       Review[]
   bookings      Booking[]
   notifications Notification[]
+  feedbacks     Feedback[]
 
   @@map("users")
 }
@@ -150,6 +151,19 @@ model News {
   updatedAt      DateTime @updatedAt
 
   @@map("news")
+}
+
+model Feedback {
+  id      String @id @default(uuid())
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("feedbacks")
 }
 
 enum Role {

@@ -25,6 +25,13 @@ router.get("/:id", UserController.getSingleUserById);
 router.get("/", auth("admin"), UserController.getAllCustomers);
 
 router.patch(
+  "/update-profile",
+  auth("customer", "admin", "superadmin"),
+  validateRequest(UserValidation.update),
+  UserController.updateProfile
+);
+
+router.patch(
   "/:id",
   auth("admin", "customer"),
   validateRequest(UserValidation.update),

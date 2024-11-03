@@ -59,6 +59,9 @@ const getAllCustomers = async () => {
     where: {
       role: Role.customer,
     },
+    orderBy: {
+      createdAt: "asc",
+    },
   });
   if (result) return excludeFromList(result, ["password"]);
 };
@@ -105,6 +108,18 @@ const deleteUser = async (id: string) => {
   if (result) return excludeFromObject(result, ["password"]);
 };
 
+const updateProfile = async (userId: string, payload: Partial<User>) => {
+  const result = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      ...payload,
+    },
+  });
+  if (result) return excludeFromObject(result, ["password"]);
+};
+
 export const UserService = {
   createUser,
   getSingleUserById,
@@ -113,4 +128,5 @@ export const UserService = {
   deleteUser,
   getAllAdmins,
   createAdmin,
+  updateProfile,
 };
