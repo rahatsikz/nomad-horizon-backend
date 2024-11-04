@@ -3,6 +3,8 @@ import ApiError from "../../../errors/ApiError";
 import prisma from "../../../shared/prisma";
 import { IBooking } from "./booking.interface";
 import { BookingStatus } from "@prisma/client";
+import { IPaginationOptions } from "../../../interface/pagination";
+import { paginationHelpers } from "../../../helpers/paginationHelpers";
 
 const createBooking = async (payload: IBooking, userId: string) => {
   const result = await prisma.$transaction(
@@ -83,11 +85,24 @@ const cancelBooking = async (bookingId: string, userId: string) => {
   return result;
 };
 
-const getAllBookings = async (bookingStatus: BookingStatus) => {
+const getAllBookings = async (
+  filters: {
+    bookingStatus?: BookingStatus;
+  },
+  paginationOptions: IPaginationOptions
+) => {
+  const { page, limit, sortBy, sortOrder, skip } =
+    paginationHelpers.calculatePagination(paginationOptions);
+
+  const { bookingStatus } = filters;
+
   const result = await prisma.booking.findMany({
     where: {
       bookingStatus: bookingStatus ? bookingStatus : undefined,
     },
+    skip: skip,
+    take: limit,
+    orderBy: { [sortBy]: sortOrder },
     include: {
       service: {
         select: {
@@ -104,7 +119,20 @@ const getAllBookings = async (bookingStatus: BookingStatus) => {
     },
   });
 
-  return result;
+  const total = await prisma.booking.count({
+    where: {
+      bookingStatus: bookingStatus ? bookingStatus : undefined,
+    },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data: result,
+  };
 };
 
 const adjustBooking = async (id: string, payload: Partial<IBooking>) => {

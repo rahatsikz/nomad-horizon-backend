@@ -28,7 +28,7 @@ const getAllServices = async (
   next: NextFunction
 ) => {
   try {
-    const filters = pick(req.query, ["search", "category", "price"]);
+    const filters = pick(req.query, ["search", "category", "price", "status"]);
     const paginationOptions = pick(req.query, [
       "page",
       "limit",

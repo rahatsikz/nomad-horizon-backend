@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { BookingService } from "./booking.service";
 import httpStatus from "http-status";
 import { BookingStatus } from "@prisma/client";
+import pick from "../../../shared/pick";
 
 const createBooking = async (
   req: Request,
@@ -69,8 +70,18 @@ const getAllBookings = async (
   next: NextFunction
 ) => {
   try {
-    const bookingStatus = req.query?.bookingStatus as BookingStatus;
-    const result = await BookingService.getAllBookings(bookingStatus);
+    // const bookingStatus = req.query?.bookingStatus as BookingStatus;
+    const filters = pick(req.query, ["bookingStatus"]);
+    const paginationOptions = pick(req.query, [
+      "page",
+      "limit",
+      "sortBy",
+      "sortOrder",
+    ]);
+    const result = await BookingService.getAllBookings(
+      filters,
+      paginationOptions
+    );
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
