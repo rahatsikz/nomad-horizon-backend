@@ -44,4 +44,10 @@ router.delete(
   BookingController.deleteBooking
 );
 
+router.get(
+  "/bookings-by-interval",
+  auth("admin"),
+  BookingController.getBookingCountsByInterval
+);
+
 export const BookingRoutes = router;

@@ -5,6 +5,7 @@ import { IBooking } from "./booking.interface";
 import { BookingStatus } from "@prisma/client";
 import { IPaginationOptions } from "../../../interface/pagination";
 import { paginationHelpers } from "../../../helpers/paginationHelpers";
+import { differenceInDays } from "./booking.utils";
 
 const createBooking = async (payload: IBooking, userId: string) => {
   const result = await prisma.$transaction(
@@ -88,17 +89,19 @@ const cancelBooking = async (bookingId: string, userId: string) => {
 const getAllBookings = async (
   filters: {
     bookingStatus?: BookingStatus;
+    createdAt?: Date;
   },
   paginationOptions: IPaginationOptions
 ) => {
   const { page, limit, sortBy, sortOrder, skip } =
     paginationHelpers.calculatePagination(paginationOptions);
 
-  const { bookingStatus } = filters;
+  const { bookingStatus, createdAt } = filters;
 
   const result = await prisma.booking.findMany({
     where: {
       bookingStatus: bookingStatus ? bookingStatus : undefined,
+      createdAt: createdAt ? { lte: createdAt } : undefined,
     },
     skip: skip,
     take: limit,
@@ -122,6 +125,7 @@ const getAllBookings = async (
   const total = await prisma.booking.count({
     where: {
       bookingStatus: bookingStatus ? bookingStatus : undefined,
+      createdAt: createdAt ? { lte: createdAt } : undefined,
     },
   });
   return {
@@ -248,6 +252,40 @@ const deleteBooking = async (id: string) => {
   return result;
 };
 
+const getBookingCountsByInterval = async () => {
+  const bookings = await prisma.booking.findMany({
+    where: {
+      //! filter can be added later
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const startDate = new Date("2024-10-01T00:00:00.000Z");
+  const endDate = new Date();
+
+  const totalDays = differenceInDays(endDate, startDate);
+  const totalIntervals = Math.ceil(totalDays / 5);
+
+  // Prepopulate groupedData with intervals and count 0
+  const groupedData = Array.from({ length: totalIntervals }, (_, i) => ({
+    dayCount: (i + 1) * 5,
+    bookingCountInInterval: 0,
+  }));
+
+  for (let i = 0; i < bookings.length; i++) {
+    const currentBooking = bookings[i];
+    const daysSinceStart = differenceInDays(
+      new Date(currentBooking.createdAt),
+      startDate
+    );
+    const intervalIndex = Math.floor(daysSinceStart / 5);
+
+    groupedData[intervalIndex].bookingCountInInterval += 1;
+  }
+
+  return groupedData;
+};
+
 export const BookingService = {
   createBooking,
   customerSpecificBookings,
@@ -256,4 +294,5 @@ export const BookingService = {
   adjustBooking,
   updateBookingStatus,
   deleteBooking,
+  getBookingCountsByInterval,
 };

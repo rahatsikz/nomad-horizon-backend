@@ -71,7 +71,7 @@ const getAllBookings = async (
 ) => {
   try {
     // const bookingStatus = req.query?.bookingStatus as BookingStatus;
-    const filters = pick(req.query, ["bookingStatus"]);
+    const filters = pick(req.query, ["bookingStatus", "createdAt"]);
     const paginationOptions = pick(req.query, [
       "page",
       "limit",
@@ -152,6 +152,24 @@ const deleteBooking = async (
   }
 };
 
+const getBookingCountsByInterval = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await BookingService.getBookingCountsByInterval();
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Booking counts fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const BookingController = {
   createBooking,
   customerSpecificBookings,
@@ -160,4 +178,5 @@ export const BookingController = {
   adjustBooking,
   updateBookingStatus,
   deleteBooking,
+  getBookingCountsByInterval,
 };

@@ -2,7 +2,7 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import prisma from "../../../shared/prisma";
 import { validateSchedule } from "./service.utils";
-import { Service } from "@prisma/client";
+import { Service, Status } from "@prisma/client";
 import { paginationHelpers } from "../../../helpers/paginationHelpers";
 import { IPaginationOptions } from "../../../interface/pagination";
 
@@ -82,6 +82,7 @@ const getAllServices = async (
     search?: string;
     category?: string;
     price?: number;
+    status?: Status;
   },
   paginationOptions: IPaginationOptions
 ) => {
