@@ -8,10 +8,28 @@ const handleClientError = (
   error: Prisma.PrismaClientKnownRequestError
 ): IGenericErrorResponse => {
   let errors: IGenericErrorMessage[] = [];
-  const statusCode = 400;
+  let statusCode = 400;
   let message = "";
 
-  if (error.code === "P2025") {
+  if (error.code === "P2002") {
+    const target = Array.isArray(error.meta?.target)
+      ? error.meta.target.map(String)
+      : [];
+    const isBookingSlotConflict = ["serviceId", "date", "startTime"].every(
+      (field) => target.includes(field)
+    );
+
+    statusCode = 409;
+    message = isBookingSlotConflict
+      ? "This booking slot has already been booked."
+      : "A record with the provided values already exists.";
+    errors = [
+      {
+        path: "",
+        message,
+      },
+    ];
+  } else if (error.code === "P2025") {
     message = (error.meta?.cause as string) || "Record not found !";
     errors = [
       {

@@ -7,7 +7,7 @@ import {
   validateSchedule,
 } from "../service/service.utils";
 import { formatTime } from "./schedule.utils";
-import { Schedule } from "@prisma/client";
+import { BookingStatus, Schedule } from "@prisma/client";
 
 const getSchedulesOfAvailablity = async ({
   serviceId,
@@ -28,6 +28,13 @@ const getSchedulesOfAvailablity = async ({
     where: {
       serviceId,
       date,
+      bookingStatus: {
+        not: BookingStatus.cancelled,
+      },
+    },
+    select: {
+      startTime: true,
+      endTime: true,
     },
   });
 
@@ -70,11 +77,14 @@ const getSchedulesOfAvailablity = async ({
 
   const schedule = Array.from({ length: totalSessions }).map((_, index) => {
     const startTime = new Date();
-    // initial time
-    startTime.setHours(startHourInMinutes / 60);
-    startTime.setMinutes(0);
-    // add session duration
-    startTime.setMinutes(startTime.getMinutes() + index * sessionDuration);
+    const startHour = Math.floor(startHourInMinutes / 60);
+    const startMinute = startHourInMinutes % 60;
+    startTime.setHours(
+      startHour,
+      startMinute + index * sessionDuration,
+      0,
+      0,
+    );
     const endTime = new Date(startTime.getTime() + sessionDuration * 60 * 1000);
 
     const isSessionAvailable = bookings.find(

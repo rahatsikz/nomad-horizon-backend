@@ -53,8 +53,9 @@ describe('User API', () => {
       password: 'password123',
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(409);
     expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe('A record with the provided values already exists.');
   });
 
   it('allows a customer to update their own profile', async () => {
