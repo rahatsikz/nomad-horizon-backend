@@ -1,22 +1,51 @@
-import { Review } from "@prisma/client";
+import httpStatus from "http-status";
+import { BookingStatus } from "@prisma/client";
 import prisma from "../../../shared/prisma";
+import ApiError from "../../../errors/ApiError";
 
-const createReview = async (payload: Review, userId: string) => {
-  const isBookingExists = await prisma.booking.findUnique({
+type CreateReviewInput = {
+  content: string;
+  rating: number;
+  bookingId: string;
+};
+
+const createReview = async (payload: CreateReviewInput, userId: string) => {
+  const booking = await prisma.booking.findFirst({
     where: {
       id: payload.bookingId,
+      userId,
     },
   });
 
-  if (!isBookingExists) {
-    throw new Error("Service not found");
+  if (!booking) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Booking not found");
+  }
+
+  if (booking.bookingStatus !== BookingStatus.completed) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Only completed bookings can be reviewed",
+    );
+  }
+
+  const existingReview = await prisma.review.findFirst({
+    where: {
+      bookingId: booking.id,
+      userId,
+    },
+  });
+
+  if (existingReview) {
+    throw new ApiError(httpStatus.CONFLICT, "This booking has already been reviewed");
   }
 
   const result = await prisma.review.create({
     data: {
-      ...payload,
+      content: payload.content,
+      rating: payload.rating,
+      bookingId: booking.id,
       userId,
-      serviceId: isBookingExists.serviceId,
+      serviceId: booking.serviceId,
     },
   });
 
@@ -45,7 +74,12 @@ const getAllReviews = async (filters: {
       createdAt: "desc",
     },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
     },
   });
   return result;

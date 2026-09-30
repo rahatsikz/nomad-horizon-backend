@@ -16,16 +16,20 @@ const getSchedulesOfAvailablity = async ({
   serviceId?: string;
   date?: Date;
 }) => {
+  if (!serviceId) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Service id is required");
+  }
+
+  if (!date) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Date is required");
+  }
+
   const bookings = await prisma.booking.findMany({
     where: {
       serviceId,
       date,
     },
   });
-
-  if (!serviceId) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Service id is required");
-  }
 
   const service = await prisma.service.findUnique({
     where: {
@@ -35,10 +39,6 @@ const getSchedulesOfAvailablity = async ({
       schedules: true,
     },
   });
-
-  if (!date) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Date is required");
-  }
 
   const selectedDate = new Date(date).getDay();
   const selectedDay = Weekdays[selectedDate];

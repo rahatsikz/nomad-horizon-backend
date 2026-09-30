@@ -62,3 +62,39 @@ npm run dev
 
 Server will run in your desired port number mentioned above.
 You can check [http://localhost:5000](http://localhost:5000) to see the result.
+
+## Testing
+
+The project uses Vitest, Supertest, Prisma, and PostgreSQL for automated tests.
+Unit tests run without a database. API and integration tests require a separate
+PostgreSQL database and must never use the development or production database.
+
+Create a test environment file from the committed template:
+
+```bash
+Copy-Item .env.test.example .env.test
+```
+
+Update `DATABASE_URL` so it points to a dedicated database whose name includes
+`test`, for example `nomad_horizon_test`. Then apply the existing migrations:
+
+```bash
+$env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/nomad_horizon_test?schema=public"
+npx prisma migrate deploy
+```
+
+The Prisma CLI reads `DATABASE_URL` from the process environment. Do not replace
+your normal `.env` with test credentials.
+
+Run the test suites with:
+
+```bash
+npm run test:unit
+npm run test:api
+npm run test:coverage
+npm run typecheck:test
+```
+
+The API test helpers refuse to run unless the database name contains `test`.
+Tests reset their own data and use the exported Express app from `src/app.ts`,
+so they do not open a listening server.

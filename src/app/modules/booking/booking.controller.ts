@@ -1,14 +1,10 @@
-import { NextFunction, Request, Response } from "express";
-import { BookingService } from "./booking.service";
-import httpStatus from "http-status";
-import { BookingStatus } from "@prisma/client";
-import pick from "../../../shared/pick";
+import { NextFunction, Request, Response } from 'express';
+import { BookingService } from './booking.service';
+import httpStatus from 'http-status';
+import { BookingStatus } from '@prisma/client';
+import pick from '../../../shared/pick';
 
-const createBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const createBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const payload = req.body;
     const userId = req.user?.userId;
@@ -17,7 +13,7 @@ const createBooking = async (
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking added successfully",
+      message: 'Booking added successfully',
       data: result,
     });
   } catch (error) {
@@ -25,18 +21,14 @@ const createBooking = async (
   }
 };
 
-const customerSpecificBookings = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const customerSpecificBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.userId;
     const result = await BookingService.customerSpecificBookings(userId);
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Customer Bookings fetched successfully",
+      message: 'Customer Bookings fetched successfully',
       data: result,
     });
   } catch (error) {
@@ -44,11 +36,7 @@ const customerSpecificBookings = async (
   }
 };
 
-const cancelBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const cancelBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.userId;
     const bookingId = req.params.id;
@@ -56,7 +44,7 @@ const cancelBooking = async (
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking cancelled successfully",
+      message: 'Booking cancelled successfully',
       data: result,
     });
   } catch (error) {
@@ -64,28 +52,16 @@ const cancelBooking = async (
   }
 };
 
-const getAllBookings = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getAllBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // const bookingStatus = req.query?.bookingStatus as BookingStatus;
-    const filters = pick(req.query, ["bookingStatus", "createdAt"]);
-    const paginationOptions = pick(req.query, [
-      "page",
-      "limit",
-      "sortBy",
-      "sortOrder",
-    ]);
-    const result = await BookingService.getAllBookings(
-      filters,
-      paginationOptions
-    );
+    const filters = pick(req.query, ['bookingStatus', 'createdAt']);
+    const paginationOptions = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const result = await BookingService.getAllBookings(filters, paginationOptions);
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Bookings fetched successfully",
+      message: 'Bookings fetched successfully',
       data: result,
     });
   } catch (error) {
@@ -93,11 +69,7 @@ const getAllBookings = async (
   }
 };
 
-const adjustBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const adjustBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bookingId = req.params.id;
     const payload = req.body;
@@ -105,7 +77,7 @@ const adjustBooking = async (
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking adjusted successfully",
+      message: 'Booking adjusted successfully',
       data: result,
     });
   } catch (error) {
@@ -113,11 +85,7 @@ const adjustBooking = async (
   }
 };
 
-const updateBookingStatus = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const updateBookingStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bookingId = req.params.id;
     const payload = req.body;
@@ -125,7 +93,7 @@ const updateBookingStatus = async (
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking status updated successfully",
+      message: 'Booking status updated successfully',
       data: result,
     });
   } catch (error) {
@@ -133,18 +101,14 @@ const updateBookingStatus = async (
   }
 };
 
-const deleteBooking = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const deleteBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bookingId = req.params.id;
     const result = await BookingService.deleteBooking(bookingId);
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking deleted successfully",
+      message: 'Booking deleted successfully',
       data: result,
     });
   } catch (error) {
@@ -152,17 +116,13 @@ const deleteBooking = async (
   }
 };
 
-const getBookingCountsByInterval = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const getBookingCountsByInterval = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await BookingService.getBookingCountsByInterval();
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
-      message: "Booking counts fetched successfully",
+      message: 'Booking counts fetched successfully',
       data: result,
     });
   } catch (error) {

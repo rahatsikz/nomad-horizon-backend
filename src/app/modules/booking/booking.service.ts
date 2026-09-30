@@ -1,11 +1,11 @@
-import httpStatus from "http-status";
-import ApiError from "../../../errors/ApiError";
-import prisma from "../../../shared/prisma";
-import { IBooking } from "./booking.interface";
-import { BookingStatus } from "@prisma/client";
-import { IPaginationOptions } from "../../../interface/pagination";
-import { paginationHelpers } from "../../../helpers/paginationHelpers";
-import { differenceInDays } from "./booking.utils";
+import httpStatus from 'http-status';
+import ApiError from '../../../errors/ApiError';
+import prisma from '../../../shared/prisma';
+import { IBooking } from './booking.interface';
+import { BookingStatus } from '@prisma/client';
+import { IPaginationOptions } from '../../../interface/pagination';
+import { paginationHelpers } from '../../../helpers/paginationHelpers';
+import { differenceInDays } from './booking.utils';
 
 const createBooking = async (payload: IBooking, userId: string) => {
   const result = await prisma.$transaction(
@@ -25,10 +25,7 @@ const createBooking = async (payload: IBooking, userId: string) => {
       });
 
       if (!newBooking) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "Booking has not been created"
-        );
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Booking has not been created');
       }
 
       // create notification
@@ -36,9 +33,9 @@ const createBooking = async (payload: IBooking, userId: string) => {
         data: {
           userId,
           content:
-            "We got your booking request for " +
+            'We got your booking request for ' +
             newBooking.service.serviceName +
-            ". Once it is approved, we will notify you.",
+            '. Once it is approved, we will notify you.',
         },
       });
 
@@ -47,7 +44,7 @@ const createBooking = async (payload: IBooking, userId: string) => {
     {
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 
   return result;
@@ -73,6 +70,30 @@ const customerSpecificBookings = async (userId: string) => {
 };
 
 const cancelBooking = async (bookingId: string, userId: string) => {
+  const booking = await prisma.booking.findFirst({
+    where: {
+      id: bookingId,
+      userId,
+    },
+    select: {
+      bookingStatus: true,
+    },
+  });
+
+  if (!booking) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Booking not found');
+  }
+
+  const cancellableStatuses: BookingStatus[] = [
+    BookingStatus.processing,
+    BookingStatus.confirmed,
+    BookingStatus.adjusted,
+  ];
+
+  if (!cancellableStatuses.includes(booking.bookingStatus)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'This booking cannot be cancelled');
+  }
+
   const result = await prisma.booking.update({
     where: {
       id: bookingId,
@@ -91,7 +112,7 @@ const getAllBookings = async (
     bookingStatus?: BookingStatus;
     createdAt?: Date;
   },
-  paginationOptions: IPaginationOptions
+  paginationOptions: IPaginationOptions,
 ) => {
   const { page, limit, sortBy, sortOrder, skip } =
     paginationHelpers.calculatePagination(paginationOptions);
@@ -140,6 +161,12 @@ const getAllBookings = async (
 };
 
 const adjustBooking = async (id: string, payload: Partial<IBooking>) => {
+  const updateData: Partial<Pick<IBooking, 'date' | 'startTime' | 'endTime'>> = {
+    date: payload.date,
+    startTime: payload.startTime,
+    endTime: payload.endTime,
+  };
+
   const result = await prisma.$transaction(
     async (tx) => {
       const updateBooking = await tx.booking.update({
@@ -147,7 +174,8 @@ const adjustBooking = async (id: string, payload: Partial<IBooking>) => {
           id,
         },
         data: {
-          ...payload,
+          ...updateData,
+          bookingStatus: BookingStatus.adjusted,
         },
         include: {
           service: {
@@ -159,10 +187,7 @@ const adjustBooking = async (id: string, payload: Partial<IBooking>) => {
       });
 
       if (!updateBooking) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "Booking has not been updated"
-        );
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Booking has not been updated');
       }
 
       // create notification
@@ -170,11 +195,11 @@ const adjustBooking = async (id: string, payload: Partial<IBooking>) => {
         data: {
           userId: updateBooking.userId,
           content:
-            "Your requested booking schedule for " +
+            'Your requested booking schedule for ' +
             updateBooking.service.serviceName +
-            " has been adjusted to " +
+            ' has been adjusted to ' +
             updateBooking.startTime +
-            " to " +
+            ' to ' +
             updateBooking.endTime,
         },
       });
@@ -184,16 +209,13 @@ const adjustBooking = async (id: string, payload: Partial<IBooking>) => {
     {
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 
   return result;
 };
 
-const updateBookingStatus = async (
-  id: string,
-  payload: { bookingStatus: BookingStatus }
-) => {
+const updateBookingStatus = async (id: string, payload: { bookingStatus: BookingStatus }) => {
   const result = await prisma.$transaction(
     async (tx) => {
       const updateBookingStatus = await tx.booking.update({
@@ -213,10 +235,7 @@ const updateBookingStatus = async (
       });
 
       if (!updateBookingStatus) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "Booking Status has not been updated"
-        );
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Booking Status has not been updated');
       }
 
       // create notification
@@ -224,9 +243,9 @@ const updateBookingStatus = async (
         data: {
           userId: updateBookingStatus.userId,
           content:
-            "Your requested booking schedule for " +
+            'Your requested booking schedule for ' +
             updateBookingStatus.service.serviceName +
-            " has been " +
+            ' has been ' +
             updateBookingStatus.bookingStatus,
         },
       });
@@ -236,7 +255,7 @@ const updateBookingStatus = async (
     {
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 
   return result;
@@ -253,15 +272,20 @@ const deleteBooking = async (id: string) => {
 };
 
 const getBookingCountsByInterval = async () => {
+  const startDate = new Date('2024-10-01T00:00:00.000Z');
+  const endDate = new Date();
+
   const bookings = await prisma.booking.findMany({
     where: {
-      //! filter can be added later
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
     },
-    orderBy: { createdAt: "asc" },
+    select: {
+      createdAt: true,
+    },
   });
-
-  const startDate = new Date("2024-10-01T00:00:00.000Z");
-  const endDate = new Date();
 
   const totalDays = differenceInDays(endDate, startDate);
   const totalIntervals = Math.ceil(totalDays / 5);
@@ -272,15 +296,13 @@ const getBookingCountsByInterval = async () => {
     bookingCountInInterval: 0,
   }));
 
-  for (let i = 0; i < bookings.length; i++) {
-    const currentBooking = bookings[i];
-    const daysSinceStart = differenceInDays(
-      new Date(currentBooking.createdAt),
-      startDate
-    );
+  for (const booking of bookings) {
+    const daysSinceStart = differenceInDays(booking.createdAt, startDate);
     const intervalIndex = Math.floor(daysSinceStart / 5);
 
-    groupedData[intervalIndex].bookingCountInInterval += 1;
+    if (intervalIndex >= 0 && intervalIndex < groupedData.length) {
+      groupedData[intervalIndex].bookingCountInInterval += 1;
+    }
   }
 
   return groupedData;

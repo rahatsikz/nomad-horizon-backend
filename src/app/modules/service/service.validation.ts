@@ -20,6 +20,25 @@ const create = z.object({
     image: z.string({
       required_error: "Service image is required",
     }),
+    schedule: z
+      .array(
+        z.object({
+          startTime: z.string(),
+          endTime: z.string(),
+          eachSessionDuration: z.number().int().positive(),
+          daysOfWeek: z.enum([
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ]),
+        })
+      )
+      .optional()
+      .default([]),
   }),
 });
 
