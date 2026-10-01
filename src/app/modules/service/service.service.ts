@@ -1,10 +1,10 @@
-import httpStatus from "http-status";
-import ApiError from "../../../errors/ApiError";
-import prisma from "../../../shared/prisma";
-import { validateSchedule } from "./service.utils";
-import { Service, Status } from "@prisma/client";
-import { paginationHelpers } from "../../../helpers/paginationHelpers";
-import { IPaginationOptions } from "../../../interface/pagination";
+import httpStatus from 'http-status';
+import ApiError from '../../../errors/ApiError';
+import prisma from '../../../shared/prisma';
+import { validateSchedule } from './service.utils';
+import { Service, Status } from '@prisma/client';
+import { paginationHelpers } from '../../../helpers/paginationHelpers';
+import { IPaginationOptions } from '../../../interface/pagination';
 
 const createService = async (payload: any) => {
   const { schedule, ...otherPayload } = payload;
@@ -16,10 +16,7 @@ const createService = async (payload: any) => {
       });
 
       if (!newService) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "Service has not been created"
-        );
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Service has not been created');
       }
 
       if (schedule.length > 0) {
@@ -29,13 +26,13 @@ const createService = async (payload: any) => {
           const isValidSchedule = validateSchedule(
             element.startTime,
             element.endTime,
-            element.eachSessionDuration
+            element.eachSessionDuration,
           );
 
           if (!isValidSchedule) {
             throw new ApiError(
               httpStatus.BAD_REQUEST,
-              `${element.daysOfWeek} schedule is not valid`
+              `${element.daysOfWeek} schedule is not valid`,
             );
           }
 
@@ -55,7 +52,7 @@ const createService = async (payload: any) => {
     {
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 
   const result = await prisma.service.findUnique({
@@ -84,7 +81,7 @@ const getAllServices = async (
     price?: number;
     status?: Status;
   },
-  paginationOptions: IPaginationOptions
+  paginationOptions: IPaginationOptions,
 ) => {
   const { page, limit, sortBy, sortOrder, skip } =
     paginationHelpers.calculatePagination(paginationOptions);
@@ -95,10 +92,10 @@ const getAllServices = async (
 
   if (search && search?.length > 0) {
     conditions.push({
-      OR: ["serviceName"].map((key) => ({
+      OR: ['serviceName'].map((key) => ({
         [key]: {
           contains: search,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
       })),
     });
@@ -107,7 +104,7 @@ const getAllServices = async (
   if (Object.keys(restFilters).length > 0) {
     conditions.push({
       AND: Object.keys(restFilters).map((key) => {
-        if (key.includes("price")) {
+        if (key.includes('price')) {
           return {
             [key]: {
               lte: Number(restFilters[key as keyof typeof restFilters]),
@@ -129,7 +126,7 @@ const getAllServices = async (
     skip: skip,
     take: limit,
     orderBy:
-      sortBy === "popularity"
+      sortBy === 'popularity'
         ? {
             reviews: {
               _count: sortOrder,
@@ -179,6 +176,11 @@ const getServiceById = async (id: string) => {
       },
     },
   });
+
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Service not found');
+  }
+
   return result;
 };
 
@@ -203,10 +205,7 @@ const deleteService = async (id: string) => {
         },
       });
       if (!deleteSchedule) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "Schedule has not been deleted"
-        );
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Schedule has not been deleted');
       }
 
       const deleteService = await tx.service.delete({
@@ -216,10 +215,7 @@ const deleteService = async (id: string) => {
       });
 
       if (!deleteService) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST,
-          "Service has not been deleted"
-        );
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Service has not been deleted');
       }
 
       return deleteService;
@@ -227,7 +223,7 @@ const deleteService = async (id: string) => {
     {
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 
   return deleteServiceWithSchedule;
